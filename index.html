@@ -144,6 +144,9 @@
   .history-bar > div.best { background: linear-gradient(to top, #fab005, #ffd43b); }
   .empty-state { text-align: center; color: #868e96; padding: 20px; font-size: 14px; }
   .header-btn { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-left: 8px; }
+  /* 활성 과목이 아닌 카드는 숨김 */
+  .scroller[data-active="역사"] .card[data-subject="국어"] { display: none !important; }
+  .scroller[data-active="국어"] .card[data-subject="역사"] { display: none !important; }
   /* 과목 토글 */
   .subject-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
   .subject-btn { flex: 1; padding: 10px; border: 2px solid #ced4da; border-radius: 8px; background: #fff; font-weight: 600; cursor: pointer; font-size: 13px; color: #495057; transition: all 0.15s; font-family: inherit; }
@@ -2646,6 +2649,7 @@
   // ===== 과목 선택 =====
   function selectSubject(subj) {
     currentSubject = subj;
+    scroller.dataset.active = subj;
     document.querySelectorAll('.subject-btn').forEach(b => b.classList.toggle('active', b.dataset.subject === subj));
     document.getElementById('subjectInfo').textContent = SUBJECTS[subj].info;
     updateNotesBadge();
@@ -2998,6 +3002,7 @@
     card.appendChild(btn);
   });
 
+  scroller.dataset.active = currentSubject;
   scroller.addEventListener('scroll', () => { if (mode !== 'idle') updateProgress(); });
   window.addEventListener('resize', updateProgress);
   document.addEventListener('keydown', (e) => {
