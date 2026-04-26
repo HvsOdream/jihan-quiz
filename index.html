@@ -144,6 +144,9 @@
   .history-bar > div.best { background: linear-gradient(to top, #fab005, #ffd43b); }
   .empty-state { text-align: center; color: #868e96; padding: 20px; font-size: 14px; }
   .header-btn { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-left: 8px; }
+  .similar-link { display: none; margin-top: 16px; padding: 12px 16px; background: #fff3bf; border: 2px dashed #fab005; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; color: #5c3c00; text-align: center; width: 100%; font-family: inherit; }
+  .similar-link:hover { background: #ffe066; }
+  .scroller.review-mode .card.answer .similar-link { display: block; }
 </style>
 </head>
 <body>
@@ -1435,6 +1438,42 @@
     const badge = document.getElementById('notesBadge');
     if (badge) badge.textContent = wrongIds.length > 0 ? '(' + wrongIds.length + '문제)' : '';
   }
+
+  // ===== 유사 문제 (similar.json 기반) =====
+  let SIMILAR_DATA = null;
+  async function loadSimilar() {
+    if (SIMILAR_DATA) return SIMILAR_DATA;
+    try {
+      const res = await fetch('./similar.json?_=' + Date.now());
+      SIMILAR_DATA = await res.json();
+    } catch(e) {
+      SIMILAR_DATA = { similar: {} };
+    }
+    return SIMILAR_DATA;
+  }
+  async function openSimilar(qNum) {
+    const data = await loadSimilar();
+    const list = (data.similar && data.similar[qNum]) || [];
+    if (list.length === 0) {
+      alert('아직 #' + qNum + ' 유사 문제가 없어!\n아빠한테 만들어달라고 부탁해.');
+      return;
+    }
+    if (list.length === 1) { location.href = list[0]; return; }
+    let txt = '#' + qNum + ' 유사 문제 ' + list.length + '개 있어:\n\n';
+    list.forEach((u, i) => { txt += (i+1) + '. ' + u + '\n'; });
+    const choice = window.prompt(txt + '\n번호 입력:');
+    const idx = parseInt(choice) - 1;
+    if (!isNaN(idx) && idx >= 0 && idx < list.length) location.href = list[idx];
+  }
+  // 답 카드마다 "유사 문제 풀기" 버튼 추가 (오답노트 모드일 때만 CSS로 표시)
+  answerCards.forEach((card, qIdx) => {
+    const qNum = qIdx + 1;
+    const btn = document.createElement('button');
+    btn.className = 'similar-link';
+    btn.textContent = '💡 #' + qNum + ' 유사 문제 풀어보기';
+    btn.addEventListener('click', () => openSimilar(qNum));
+    card.appendChild(btn);
+  });
 
   scroller.addEventListener('scroll', () => { if (mode !== 'idle') updateProgress(); });
   window.addEventListener('resize', updateProgress);
