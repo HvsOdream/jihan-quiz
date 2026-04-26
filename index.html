@@ -24,7 +24,7 @@
   .scroller::-webkit-scrollbar { display: none; }
 
   .card {
-    flex: 0 0 100%; width: 100%; height: 100%;
+    flex: 0 0 100%; width: 100%; min-width: 100%; height: 100%;
     scroll-snap-align: start; scroll-snap-stop: always;
     padding: 24px; overflow-y: auto;
     display: flex; flex-direction: column;
@@ -103,7 +103,8 @@
   }
 
   @media (min-width: 1024px) {
-    .card { padding: 60px 100px; max-width: 900px; margin: 0 auto; }
+    /* 와이드 모니터에서도 콘텐츠는 최대 900px 폭으로 가운데 정렬 (max는 padding 음수 방지) */
+    .card { padding: 60px max(80px, calc(50vw - 450px)); }
   }
 </style>
 </head>
@@ -1062,11 +1063,4 @@
   scroller.addEventListener('scroll', updateProgress);
   window.addEventListener('resize', updateProgress);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') goPrev();
-    if (e.key === 'ArrowRight') goNext();
-  });
-  updateProgress();
-</script>
-
-</body>
-</html>
+    if
